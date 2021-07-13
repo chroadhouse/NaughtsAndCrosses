@@ -1,85 +1,122 @@
 import java.util.Arrays;
-public enum gameType{
-  ONEPLAYER, TWOPLAYER, END, START
+public enum GameType{
+  ONEPLAYER, TWOPLAYER, TWOPLAYEREND, START, ONEPLAYEREND
 }
 int[][] gridArray = {{0,0,0},{0,0,0},{0,0,0}};
 float lineX,lineY, x,y = 0;
 boolean cross = false;
-boolean win = false;
+boolean reset = true;
+boolean crossWin = false;
+PImage splashScreen;
+GameType gameMode = GameType.START;
+
 void setup(){
   size(900,900);
-  printArray();
+  splashScreen = loadImage("splashScreen.png");
+  splashScreen.resize(width,height);
 }
 
 void draw(){
-   lineX = 300;
-  while(lineX < width){
-    line(lineX,0,lineX,height);
-    lineX = lineX +300;
+  if(gameMode == GameType.TWOPLAYER){
+    if(reset){ background(210,210,210); reset = false; }
+    lineX = 300;
+    while(lineX < width){
+      line(lineX,0,lineX,height);
+      lineX = lineX +300;
+    }
+    
+    lineY = 300;
+    while(lineY < height){
+      line(0,lineY,width,lineY);
+      lineY = lineY + 300;
+    }
+  }
+  if(gameMode == GameType.START){ 
+      System.out.println("START GAMEMODE");
+      background(210,210,210);
+      image(splashScreen,0,0);
   }
   
-  lineY = 300;
-  while(lineY < height){
-    line(0,lineY,width,lineY);
-    lineY = lineY + 300;
-  }
-  printArray();
-  //line(450,0,450,900);
-  if(win){
-    System.out.println("WINNER");
+  if(gameMode == GameType.TWOPLAYEREND){
+    background(210,210,210);
+    System.out.println("THE GAME HAS ENDED");
+    if(crossWin){
+      System.out.println("Crosses Win");
+      text("Crosses Win", width/2, height*0.25);
+    }else{
+      System.out.println("Naughts Win");
+      text("Naughts Win", width/2, height*0.25);
+    }
   }
 }
+
+void keyPressed(){
+  if(key == ' ' && gameMode==GameType.START){
+    System.out.println("COMNG");
+    gameMode = GameType.TWOPLAYER;
+  }
+  
+  if(gameMode==GameType.TWOPLAYEREND){
+    //Here i will check the different option
+    if(key=='1'){
+      //Then play again
+      reset = true;
+      resetArray();
+      gameMode = GameType.TWOPLAYER;
+    }
+  }
+}
+
 
 void mousePressed(){
-  if(cross){
-    cross = false;
-  }else{
-    cross = true;
-  }
-  
-  y=0; x=0;
-  if(mouseY > y && mouseY < y+300){ // ROW1
-    if(mouseX > x && mouseX < x+300){ // column 1
-    //x and y shpould be 0
-      drawShape(cross,x,y,0,0);
-    }else if(mouseX > x+300 && mouseX< x+600){ //colum2
-      x = x+300;
-      drawShape(cross,x,y,0,1);
+  if(gameMode == GameType.TWOPLAYER){
+    if(cross){
+      cross = false;
+    }else{
+      cross = true;
     }
-    else{
-      x = x+600;
-      drawShape(cross,x,y,0,2);
-    }
-  }else if(mouseY > y+300 && mouseY <y+600){
-    y = y+300;
-    if(mouseX > x && mouseX < x+300){ // column 1
-      drawShape(cross,x,y,1,0);
-    }else if(mouseX > x+300 && mouseX< x+600){ //colum2
-      x = x+300;
-      drawShape(cross,x,y,1,1);
-    }
-    else{
-      x = x+600;
-      drawShape(cross,x,y,1,2);
-    }
-  }else{
-    y = y+600;
-    if(mouseX > x && mouseX < x+300){ // column 1
-      drawShape(cross,x,y,2,0);
-    }else if(mouseX > x+300 && mouseX< x+600){ //colum2
-      x = x+300;
-      drawShape(cross,x,y,2,1);
-    }
-    else{
-      x = x+600;
-      drawShape(cross,x,y,2,2);
+    
+    y=0; x=0;
+    if(mouseY > y && mouseY < y+300){ // ROW1
+      if(mouseX > x && mouseX < x+300){ // column 1
+      //x and y shpould be 0
+        drawShape(cross,x,y,0,0);
+      }else if(mouseX > x+300 && mouseX< x+600){ //colum2
+        x = x+300;
+        drawShape(cross,x,y,0,1);
+      }
+      else{
+        x = x+600;
+        drawShape(cross,x,y,0,2);
+      }
+    }else if(mouseY > y+300 && mouseY <y+600){
+      y = y+300;
+      if(mouseX > x && mouseX < x+300){ // column 1
+        drawShape(cross,x,y,1,0);
+      }else if(mouseX > x+300 && mouseX< x+600){ //colum2
+        x = x+300;
+        drawShape(cross,x,y,1,1);
+      }
+      else{
+        x = x+600;
+        drawShape(cross,x,y,1,2);
+      }
+    }else{
+      y = y+600;
+      if(mouseX > x && mouseX < x+300){ // column 1
+        drawShape(cross,x,y,2,0);
+      }else if(mouseX > x+300 && mouseX< x+600){ //colum2
+        x = x+300;
+        drawShape(cross,x,y,2,1);
+      }
+      else{
+        x = x+600;
+        drawShape(cross,x,y,2,2);
+      }
     }
   }
 }
 
-public void printArray(){
-  System.out.println(Arrays.deepToString(gridArray));
-}
 //0 is nothing, 1 is x and 2 is O
 public void drawShape(boolean cross, float x, float y, int row, int col){
   if(gridArray[row][col]==0){
@@ -96,13 +133,21 @@ public void drawShape(boolean cross, float x, float y, int row, int col){
   }
 }
 
+public boolean crossWinCheck(int i){
+  if(i==1) return true;
+  else return false;
+}
+
 public void checkWin(){
-  win = false;
+  boolean win = false;
+  boolean full = true;
   //Check Horizontal
   for(int i=0; i<3; i++){
     if(gridArray[i][0] == gridArray[i][1] && gridArray[i][2] == gridArray[i][0]){
       if(gridArray[i][0] != 0){
+        crossWin = crossWinCheck(gridArray[i][0]);
         win = true;
+        break;
       }
     }
   }
@@ -110,7 +155,9 @@ public void checkWin(){
   for(int i=0; i<3; i++){
     if(gridArray[0][i] == gridArray[1][i] && gridArray[2][i] == gridArray[1][i]){
       if(gridArray[0][i] != 0){
+        crossWin = crossWinCheck(gridArray[0][i]);
         win = true;
+        break;
       }
     }
   }
@@ -118,13 +165,43 @@ public void checkWin(){
   //Check Diagonal
   if(gridArray[0][0] == gridArray[1][1] && gridArray[1][1] == gridArray[2][2]){
       if(gridArray[1][1] != 0){
+        crossWin = crossWinCheck(gridArray[1][1]);
         win = true;
       }
   }
   
   if(gridArray[0][2] == gridArray[1][1] && gridArray[1][1] == gridArray[2][0]){
       if(gridArray[1][1] != 0){
+        crossWin = crossWinCheck(gridArray[1][1]);
         win = true;
       }
+  }
+  
+  if(win){
+    gameMode = GameType.TWOPLAYEREND;
+    
+    //reset = true;
+    //resetArray();
+  }else{
+    for(int i=0; i<3; i++){
+      for(int j=0; j<3; j++){
+        if(gridArray[i][j] == 0){
+           full = false;
+        }
+      }
+    }
+    if(full) {
+      gameMode = GameType.TWOPLAYEREND;
+      //reset = true;
+      //resetArray();
+    }
+  }
+}
+
+public void resetArray(){
+  for(int i=0; i<3; i++){
+    for(int j=0; j<3; j++){
+      gridArray[i][j] = 0;
+    }
   }
 }
