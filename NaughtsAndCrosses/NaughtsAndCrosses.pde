@@ -1,232 +1,161 @@
-import java.util.Arrays;
-public enum GameType{
-  ONEPLAYER, TWOPLAYER, TWOPLAYEREND, START, ONEPLAYEREND
+enum GameType {
+  START, PLAYING, END
 }
-int[][] gridArray = {{0,0,0},{0,0,0},{0,0,0}};
-float lineX,lineY, x,y = 0;
-int crossPlayer, naughtPlayer = 0;
-boolean cross = false;
-boolean full = true;
-boolean reset = true;
-boolean crossWin = false;
-PImage splashScreen;
-GameType gameMode = GameType.START;
 
+char[][] board = {{' ',' ',' '},{' ',' ',' '},{' ',' ',' '}};
+GameType gameMode = GameType.START;
+PImage splashScreen;
+char winner = ' ';
+boolean isCross;
 void setup(){
-  size(900,900);
+  size(1200,1200);
+  gameMode = GameType.START;
   splashScreen = loadImage("splashScreen.png");
   splashScreen.resize(width,height);
 }
 
 void draw(){
-  if(gameMode == GameType.TWOPLAYER){
-    if(reset){ background(210,210,210); reset = false; }
-    lineX = 300;
-    while(lineX < width){
-      line(lineX,0,lineX,height);
-      lineX = lineX +300;
-    }
-    
-    lineY = 300;
-    while(lineY < height){
-      line(0,lineY,width,lineY);
-      lineY = lineY + 300;
-    }
-  }
-  if(gameMode == GameType.START){ 
-      System.out.println("START GAMEMODE");
-      background(210,210,210);
-      image(splashScreen,0,0);
-  }
-  
-  if(gameMode == GameType.TWOPLAYEREND){
+  switch(gameMode){
+  case START:
+    System.out.println("START GAMEMODE");
     background(210,210,210);
-    System.out.println("THE GAME HAS ENDED");
-    if(full){
-      textSize(40);
-      text("No one won",width*0.4, height*0.25);
-      textSize(25);
-      text("Crosses: "+crossPlayer+"",width*0.4,height*0.3);
-      text("Naughts: "+naughtPlayer+"",width*0.4, height*0.5);
-    }else{
-      if(crossWin){
-        textSize(40);
-        text("Crosses Win", width*0.4, height*0.25);
-        textSize(25);
-        text("Crosses: "+crossPlayer+"",width*0.4,height*0.3);
-        text("Naughts: "+naughtPlayer+"",width*0.4, height*0.5);
-      }else if(!crossWin){
-        textSize(40);
-        text("Naughts Win", width*0.4, height*0.25);
-        textSize(25);
-        text("Crosses: "+crossPlayer+"",width*0.4,height*0.3);
-        text("Naughts: "+naughtPlayer+"",width*0.4, height*0.5);
-      }
-    }
+    image(splashScreen,0,0);
+    break;
     
-   
+  case PLAYING:
+    background(210,210,210);
+    //Varibale for the length of one of the sqaures 
+    int w = width/3;
+    int h = height/3;
+    for(int i=0; i<3; i++){
+      for(int j=0;j<3; j++){
+        //Works out the middle of each of the aquares 
+        int x = w * j + w/2;
+        int y = h * i + h/2;
+        //Lines for the grid
+        line(w,0,w,height);
+        line(w*2,0,w*2,height);
+        line(0,h,width,h);
+        line(0,h*2,width,h*2);
+        strokeWeight(4);
+        //Draws any symbols that 
+        if(board[j][i]=='o'){
+          noFill();
+          circle(x,y,w/2);
+          //Draw an ellipse 
+        }else if(board[j][i]=='x'){
+          int xr = w/4;
+          line(x-xr, y-xr, x+xr, y+xr);
+          line(x+xr, y-xr , x-xr, y+xr);
+        }
+      } 
+    }
+    System.out.println(winnerCheck());
+    winner = winnerCheck();
+    if(winnerCheck()!=' ')gameMode = GameType.END;
+    break;
+  case END:
+    background(210,210,210);
+    System.out.println("Winning CHAR IS "+winner+" It was there");
+    switch(winner){
+      case 'x':
+        text("Player X has won the macth ",width/2, height/2);
+        break;
+      case 'o':
+        text("Player O has won the match",width/2, height/2);
+        break;
+    
+    }
+    break;
   }
 }
 
 void keyPressed(){
-  if(key == ' ' && gameMode==GameType.START){
-    System.out.println("COMNG");
-    gameMode = GameType.TWOPLAYER;
-  }
-  
-  if(gameMode==GameType.TWOPLAYEREND){
-    //Here i will check the different option
-    if(key=='1'){
-      //Then play again
-      reset = true;
-      cross = false;
-      resetArray();
-      gameMode = GameType.TWOPLAYER;
-    }
+  // Starts the game
+  if(key ==' ' && gameMode !=GameType.PLAYING) {
+    gameMode = GameType.PLAYING;
+    isCross = false; 
+    resetArray();
   }
 }
-
 
 void mousePressed(){
-  if(gameMode == GameType.TWOPLAYER){
-    if(cross){
-      cross = false;
-    }else{
-      cross = true;
+  //Changes players move 
+  isCross = !isCross;
+  //Sets the vales again
+  float h = height/3;
+  float w = width/3;
+  //This now finds which quadrant in it
+  if(mouseY > 0 && mouseY < h){ //first row
+    if(mouseX > 0 && mouseX < w){ // 0,0
+      addPiece(isCross,0,0);
+    }else if(mouseX > w && mouseX < w*2){//1,0
+      addPiece(isCross,1,0);
+    }else{ //2,0
+      addPiece(isCross,2,0);
     }
-    
-    y=0; x=0;
-    if(mouseY > y && mouseY < y+300){ // ROW1
-      if(mouseX > x && mouseX < x+300){ // column 1
-      //x and y shpould be 0
-        drawShape(cross,x,y,0,0);
-      }else if(mouseX > x+300 && mouseX< x+600){ //colum2
-        x = x+300;
-        drawShape(cross,x,y,0,1);
-      }
-      else{
-        x = x+600;
-        drawShape(cross,x,y,0,2);
-      }
-    }else if(mouseY > y+300 && mouseY <y+600){
-      y = y+300;
-      if(mouseX > x && mouseX < x+300){ // column 1
-        drawShape(cross,x,y,1,0);
-      }else if(mouseX > x+300 && mouseX< x+600){ //colum2
-        x = x+300;
-        drawShape(cross,x,y,1,1);
-      }
-      else{
-        x = x+600;
-        drawShape(cross,x,y,1,2);
-      }
-    }else{
-      y = y+600;
-      if(mouseX > x && mouseX < x+300){ // column 1
-        drawShape(cross,x,y,2,0);
-      }else if(mouseX > x+300 && mouseX< x+600){ //colum2
-        x = x+300;
-        drawShape(cross,x,y,2,1);
-      }
-      else{
-        x = x+600;
-        drawShape(cross,x,y,2,2);
-      }
+  }else if(mouseY > h && mouseY < h*2){ // Second Row
+    if(mouseX > 0 && mouseX < w){ // 0,1
+      addPiece(isCross,0,1);
+    }else if(mouseX > w && mouseX < w*2){//1,1
+      addPiece(isCross,1,1);
+    }else{ //2,1
+      addPiece(isCross,2,1);
+    }
+  }else{ // Third row
+    if(mouseX > 0 && mouseX < w){ // 0,2
+      addPiece(isCross,0,2);
+    }else if(mouseX > w && mouseX < w*2){//1,2
+      addPiece(isCross,1,2); 
+    }else{ //2,2
+      addPiece(isCross,2,2);
     }
   }
 }
 
-//0 is nothing, 1 is x and 2 is O
-public void drawShape(boolean cross, float x, float y, int row, int col){
-  if(gridArray[row][col]==0){
-    if(cross){
-      line(x+30,y+30,x+270,y+270);
-      line(x+270,y+30,x+30,y+270);
-      gridArray[row][col] = 1;
-      checkWin();
+public void addPiece(boolean isCross, int row, int col){
+  //Checks to see if the piece can be placed on the board 
+  if(isAvailable(row,col)){
+    if(isCross){
+      board[row][col] = 'x';
     }else{
-      circle(x+150,y+150,200);
-      gridArray[row][col] = 2;
-      checkWin();
+      board[row][col] = 'o';
     }
   }
 }
 
-public boolean crossWinCheck(int i){
-  if(i==1) {
-    crossPlayer++;
-    return true;
-  }
-  else{ 
-    naughtPlayer++;
-    return false;
-  }
+public boolean isAvailable(int row, int col){// Method to see what is there 
+  return (board[row][col] ==' ');
 }
 
-public void checkWin(){
-  boolean win = false;
-  full = true;
-  //Check Horizontal
+public char winnerCheck(){
+  boolean full = true;
+  //Horizontal and vertical
   for(int i=0; i<3; i++){
-    if(gridArray[i][0] == gridArray[i][1] && gridArray[i][2] == gridArray[i][0]){
-      if(gridArray[i][0] != 0){
-        crossWin = crossWinCheck(gridArray[i][0]);
-        win = true;
-        break;
-      }
-    }
+      if(isEqual(board[i][0], board[i][1], board[i][2]) && board[i][0]!=' ') return board[i][0];
+      if(isEqual(board[0][i], board[1][i], board[2][i]) && board[0][i]!=' ')return board[0][1];
   }
-  //Check vertical 
-  for(int i=0; i<3; i++){
-    if(gridArray[0][i] == gridArray[1][i] && gridArray[2][i] == gridArray[1][i]){
-      if(gridArray[0][i] != 0){
-        crossWin = crossWinCheck(gridArray[0][i]);
-        win = true;
-        break;
-      }
-    }
-  }
-  
-  //Check Diagonal
-  if(gridArray[0][0] == gridArray[1][1] && gridArray[1][1] == gridArray[2][2]){
-      if(gridArray[1][1] != 0){
-        crossWin = crossWinCheck(gridArray[1][1]);
-        win = true;
-      }
-  }
-  
-  if(gridArray[0][2] == gridArray[1][1] && gridArray[1][1] == gridArray[2][0]){
-      if(gridArray[1][1] != 0){
-        crossWin = crossWinCheck(gridArray[1][1]);
-        win = true;
-      }
-  }
-  
-  if(win){
-    gameMode = GameType.TWOPLAYEREND;
-    full = false;
-    //reset = true;
-    //resetArray();
-  }else{
-    for(int i=0; i<3; i++){
-      for(int j=0; j<3; j++){
-        if(gridArray[i][j] == 0){
-           full = false;
-        }
-      }
-    }
-    if(full) {
-      gameMode = GameType.TWOPLAYEREND;
-      //reset = true;
-      //resetArray();
-    }
-  }
-}
-
-public void resetArray(){
+  //Diagonal
+  if((isEqual(board[0][0],board[1][1],board[2][2]) && board[1][1]!=' '))return board[1][1];
+  if((isEqual(board[2][0],board[1][1],board[0][2]) && board[0][0]!=' '))return board[1][1];
+  //Checks to see if it is full
   for(int i=0; i<3; i++){
     for(int j=0; j<3; j++){
-      gridArray[i][j] = 0;
+       if(isAvailable(i,j)) full = false;
+    }
+  }
+  if(full) return 'f';
+  return ' ';
+}
+
+public boolean isEqual(char a,char b,char c){ //See's if 3 values are all the same 
+  return (a==b && b==c && a==c);
+}
+
+public void resetArray(){ // resets the array 
+  for(int i=0; i<3; i++){
+    for(int j=0; j<3; j++){
+       board[i][j] = ' ';
     }
   }
 }
