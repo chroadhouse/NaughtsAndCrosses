@@ -4,7 +4,9 @@ public enum GameType{
 }
 int[][] gridArray = {{0,0,0},{0,0,0},{0,0,0}};
 float lineX,lineY, x,y = 0;
+int crossPlayer, naughtPlayer = 0;
 boolean cross = false;
+boolean full = true;
 boolean reset = true;
 boolean crossWin = false;
 PImage splashScreen;
@@ -40,13 +42,29 @@ void draw(){
   if(gameMode == GameType.TWOPLAYEREND){
     background(210,210,210);
     System.out.println("THE GAME HAS ENDED");
-    if(crossWin){
-      System.out.println("Crosses Win");
-      text("Crosses Win", width/2, height*0.25);
+    if(full){
+      textSize(40);
+      text("No one won",width*0.4, height*0.25);
+      textSize(25);
+      text("Crosses: "+crossPlayer+"",width*0.4,height*0.3);
+      text("Naughts: "+naughtPlayer+"",width*0.4, height*0.5);
     }else{
-      System.out.println("Naughts Win");
-      text("Naughts Win", width/2, height*0.25);
+      if(crossWin){
+        textSize(40);
+        text("Crosses Win", width*0.4, height*0.25);
+        textSize(25);
+        text("Crosses: "+crossPlayer+"",width*0.4,height*0.3);
+        text("Naughts: "+naughtPlayer+"",width*0.4, height*0.5);
+      }else if(!crossWin){
+        textSize(40);
+        text("Naughts Win", width*0.4, height*0.25);
+        textSize(25);
+        text("Crosses: "+crossPlayer+"",width*0.4,height*0.3);
+        text("Naughts: "+naughtPlayer+"",width*0.4, height*0.5);
+      }
     }
+    
+   
   }
 }
 
@@ -61,6 +79,7 @@ void keyPressed(){
     if(key=='1'){
       //Then play again
       reset = true;
+      cross = false;
       resetArray();
       gameMode = GameType.TWOPLAYER;
     }
@@ -134,13 +153,19 @@ public void drawShape(boolean cross, float x, float y, int row, int col){
 }
 
 public boolean crossWinCheck(int i){
-  if(i==1) return true;
-  else return false;
+  if(i==1) {
+    crossPlayer++;
+    return true;
+  }
+  else{ 
+    naughtPlayer++;
+    return false;
+  }
 }
 
 public void checkWin(){
   boolean win = false;
-  boolean full = true;
+  full = true;
   //Check Horizontal
   for(int i=0; i<3; i++){
     if(gridArray[i][0] == gridArray[i][1] && gridArray[i][2] == gridArray[i][0]){
@@ -179,7 +204,7 @@ public void checkWin(){
   
   if(win){
     gameMode = GameType.TWOPLAYEREND;
-    
+    full = false;
     //reset = true;
     //resetArray();
   }else{
