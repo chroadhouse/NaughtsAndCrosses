@@ -1,5 +1,5 @@
 # NaughtsAndCrosses
 
-This is a version of the game Naughts and Crosses. It is made using Java using the processing library on top of it. 
+Naughts and Crosses game made using Processing library. 
 
-Feel free to take a look :) 
+All you need to run is a version of processing, then simply run the main file
